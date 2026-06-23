@@ -38,8 +38,8 @@ export default function HomePage() {
               The next pass will port the link engine, stabilize the schema, and then use v0 to shape the dashboard and public site around the working data contract.
             </p>
           </div>
-          <Link href="/dashboard" className="btn btn-primary">
-            Open dashboard
+          <Link href="/signup" className="btn btn-primary">
+            Start free
           </Link>
         </div>
 
@@ -69,4 +69,3 @@ export default function HomePage() {
     </>
   );
 }
-

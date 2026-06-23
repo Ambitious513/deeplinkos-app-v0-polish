@@ -68,10 +68,10 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             {theme === "light" ? <MoonIcon /> : <SunIcon />}
             Theme
           </button>
-          <Link className="btn btn-ghost" href="/dashboard">
+          <Link className="btn btn-ghost" href="/login">
             Sign in
           </Link>
-          <Link className="btn btn-primary" href="/dashboard">
+          <Link className="btn btn-primary" href="/signup">
             Start free
           </Link>
           <button className="btn btn-ghost" type="button" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle menu">
@@ -98,4 +98,3 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { SignOutButton } from "@/components/auth/signout-button";
+
 const sidebarGroups = [
   {
     label: "Dashboard",
@@ -77,7 +79,13 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+type DashboardShellProps = {
+  children: React.ReactNode;
+  workspaceName: string;
+  userEmail: string | null;
+};
+
+export function DashboardShell({ children, workspaceName, userEmail }: DashboardShellProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -145,6 +153,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         ))}
 
         <div style={{ marginTop: "auto", display: "grid", gap: 10 }}>
+          <div className="dashboard-sidebar__account">
+            <span>{workspaceName}</span>
+            {userEmail ? <small>{userEmail}</small> : null}
+          </div>
           <button className="btn btn-primary" type="button">
             <PlusIcon />
             Create link
@@ -184,6 +196,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <PlusIcon />
               Create link
             </button>
+            <SignOutButton />
           </div>
         </header>
 
@@ -223,4 +236,3 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-
