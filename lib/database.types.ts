@@ -41,6 +41,7 @@ export type Database = {
           onboarding_completed_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       domains: {
         Row: {
@@ -68,6 +69,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["domains"]["Insert"]>;
+        Relationships: [];
       };
       deep_links: {
         Row: {
@@ -137,6 +139,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["deep_links"]["Insert"]>;
+        Relationships: [];
       };
       clicks: {
         Row: {
@@ -186,8 +189,10 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["clicks"]["Insert"]>;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
     Functions: {
       get_dashboard_analytics: {
         Args: { user_uuid: string; days_ago?: number };
@@ -212,5 +217,7 @@ export type Database = {
         Returns: Json;
       };
     };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };

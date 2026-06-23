@@ -163,6 +163,10 @@ create policy "domains_manage_own"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+create policy "domains_select_active_public"
+  on public.domains for select
+  using (status = 'active');
+
 create policy "deep_links_select_active_for_redirect"
   on public.deep_links for select
   using (is_active = true and status = 'active');
