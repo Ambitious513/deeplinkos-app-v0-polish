@@ -1,17 +1,20 @@
 import { notFound } from "next/navigation";
 
-const tools: Record<string, { title: string; body: string }> = {
+import { LinkComposer } from "@/components/public/link-composer";
+
+const tools: Record<string, { title: string; body: string; interactive?: boolean }> = {
   "deep-link-generator": {
     title: "Deep link generator",
-    body: "This route is a placeholder for the production tool pages that will later be wired to the real smart-link builder.",
+    body: "Paste a social, marketplace, affiliate, or app URL to see how DeepLinkOS detects the destination before creating a tracked smart link.",
+    interactive: true,
   },
   "qr-generator": {
     title: "QR generator",
-    body: "This route will later power branded QR creation tied to DeepLinkOS link objects.",
+    body: "Create branded QR codes from the same smart link object so offline scans, social clicks, and campaign reporting stay together.",
   },
   "utm-builder": {
     title: "UTM builder",
-    body: "This route will later help users generate campaign-ready URLs with tracked parameters.",
+    body: "Build campaign-ready URLs without stripping affiliate parameters or losing app-open routing behavior.",
   },
 };
 
@@ -26,9 +29,11 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
       <div className="card" style={{ maxWidth: 900, margin: "0 auto" }}>
         <div className="eyebrow">Tools</div>
         <h1 className="dashboard-page__title">{tool.title}</h1>
-        <div className="panel" style={{ marginTop: 18 }}>{tool.body}</div>
+        <p className="dashboard-page__summary">{tool.body}</p>
+        <div className="panel" style={{ marginTop: 18 }}>
+          {tool.interactive ? <LinkComposer /> : tool.body}
+        </div>
       </div>
     </section>
   );
 }
-
