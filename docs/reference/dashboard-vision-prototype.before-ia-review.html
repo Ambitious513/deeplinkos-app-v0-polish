@@ -1,0 +1,2111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeepLinkOS Dashboard Vision Prototype</title>
+  <style>
+    :root {
+      --ink: #101319;
+      --muted: #69707d;
+      --soft: #9299a6;
+      --line: #e7e8ec;
+      --line-strong: #d9dce3;
+      --canvas: #f4f5f3;
+      --panel: #ffffff;
+      --panel-2: #fafafa;
+      --sidebar: #12161f;
+      --sidebar-2: #191f2b;
+      --accent: #f06a1a;
+      --accent-soft: #fff1e8;
+      --green: #168558;
+      --green-soft: #eaf7f0;
+      --blue: #2563eb;
+      --blue-soft: #edf4ff;
+      --purple: #7c3aed;
+      --purple-soft: #f3efff;
+      --red: #d84d44;
+      --red-soft: #fff0ee;
+      --amber: #be7b00;
+      --amber-soft: #fff6dc;
+      --shadow: 0 18px 50px rgba(24, 29, 38, 0.09);
+      --shadow-soft: 0 8px 24px rgba(24, 29, 38, 0.07);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --ink: #f4f7fb;
+      --muted: #a5afbf;
+      --soft: #778397;
+      --line: rgba(255, 255, 255, 0.09);
+      --line-strong: rgba(255, 255, 255, 0.16);
+      --canvas: #080c13;
+      --panel: #121823;
+      --panel-2: #0f1520;
+      --sidebar: #070a10;
+      --sidebar-2: #101722;
+      --accent-soft: rgba(240, 106, 26, 0.14);
+      --green-soft: rgba(22, 133, 88, 0.16);
+      --blue-soft: rgba(37, 99, 235, 0.16);
+      --purple-soft: rgba(124, 58, 237, 0.16);
+      --red-soft: rgba(216, 77, 68, 0.16);
+      --amber-soft: rgba(190, 123, 0, 0.18);
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+      --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f7f7f5;
+      color: var(--ink);
+      font-family: var(--font);
+      letter-spacing: 0;
+      overflow: hidden;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: 100vw;
+      height: 100vh;
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      background: #f7f7f5;
+      border: 0;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+      transition: grid-template-columns 0.22s ease;
+    }
+
+    .app-shell.sidebar-collapsed {
+      grid-template-columns: 76px 1fr;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, var(--sidebar), #0d1118);
+      color: #fff;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      height: 100vh;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+      transition: padding 0.22s ease;
+    }
+
+    .sidebar-collapsed .sidebar {
+      padding: 18px 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 0 28px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 30% 30%, #fff 0 8%, transparent 9%),
+        conic-gradient(from 25deg, #f97316, #16a34a, #2563eb, #f97316);
+      box-shadow: 0 12px 30px rgba(240, 106, 26, 0.28);
+    }
+
+    .brand-name {
+      font-weight: 850;
+      font-size: 1.08rem;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.16s ease, width 0.16s ease;
+    }
+
+    .sidebar-toggle {
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 7px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.68);
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      position: relative;
+      padding: 0;
+    }
+
+    .sidebar-toggle::before {
+      content: "";
+      width: 14px;
+      height: 12px;
+      border: 1.6px solid currentColor;
+      border-radius: 3px;
+    }
+
+    .sidebar-toggle::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 6px;
+      width: 1.6px;
+      height: 12px;
+      border-radius: 99px;
+      background: currentColor;
+      opacity: 0.65;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .sidebar-collapsed .brand {
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    .sidebar-collapsed .brand-mark,
+    .sidebar-collapsed .brand-name,
+    .sidebar-collapsed .sidebar-section-label,
+    .sidebar-collapsed .nav-button span:not(.nav-icon),
+    .sidebar-collapsed .nav-chevron,
+    .sidebar-collapsed .nav-sublist,
+    .sidebar-collapsed .sidebar-footer,
+    .sidebar-collapsed .soon-pill {
+      display: none;
+    }
+
+    .sidebar-collapsed .sidebar-toggle {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.76);
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: none;
+    }
+
+    .sidebar-section-label {
+      color: rgba(255, 255, 255, 0.42);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 18px 10px 8px;
+      font-weight: 750;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .nav-group {
+      display: grid;
+      gap: 7px;
+    }
+
+    .nav-button {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      min-height: 50px;
+      padding: 0 10px 0 12px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.72);
+      font-weight: 700;
+      font-size: 0.98rem;
+      text-align: left;
+      transition: color 0.18s, background 0.18s, transform 0.18s;
+    }
+
+    .nav-group-toggle {
+      position: relative;
+    }
+
+    .nav-chevron {
+      margin-left: auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0;
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+
+    .nav-chevron::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+    }
+
+    .nav-group.open .nav-chevron {
+      transform: rotate(180deg);
+    }
+
+    .nav-button:hover .nav-chevron,
+    .nav-button.active .nav-chevron {
+      background: rgba(255, 255, 255, 0.12);
+      color: currentColor;
+    }
+
+    .nav-button.active .nav-chevron {
+      background: rgba(18, 22, 31, 0.08);
+    }
+
+    .nav-sublist {
+      display: none;
+      gap: 7px;
+      padding: 2px 4px 10px 52px;
+      position: relative;
+    }
+
+    .nav-sublist::before {
+      content: "";
+      position: absolute;
+      left: 31px;
+      top: 8px;
+      bottom: 14px;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-group.open .nav-sublist {
+      display: grid;
+    }
+
+    .sidebar-collapsed .nav-group.open .nav-sublist,
+    .sidebar-collapsed .nav-subitem {
+      display: none;
+    }
+
+    .nav-subitem {
+      min-height: 38px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.62);
+      text-align: left;
+      padding: 0 12px;
+      font-weight: 760;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      position: relative;
+      transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    }
+
+    .nav-subitem::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      flex: 0 0 auto;
+    }
+
+    .nav-subitem:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.07);
+      transform: translateX(2px);
+    }
+
+    .nav-subitem.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.105);
+    }
+
+    .nav-subitem.active::before {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(240, 106, 26, 0.13);
+    }
+
+    .sidebar-collapsed .nav-button {
+      justify-content: center;
+      padding: 0;
+      gap: 0;
+      width: 48px;
+      min-width: 48px;
+    }
+
+    .sidebar-collapsed .nav-list,
+    .sidebar-collapsed .nav-group {
+      justify-items: center;
+      min-width: 0;
+    }
+
+    .nav-button:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(2px);
+    }
+
+    .nav-button.inactive {
+      cursor: default;
+      opacity: 0.58;
+    }
+
+    .nav-button.inactive:hover {
+      color: rgba(255, 255, 255, 0.72);
+      background: transparent;
+      transform: none;
+    }
+
+    .nav-button.active {
+      color: var(--ink);
+      background: #fff;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .soon-pill {
+      margin-left: auto;
+      min-height: 20px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 7px;
+      color: rgba(255, 255, 255, 0.72);
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.64rem;
+      font-weight: 850;
+      letter-spacing: 0.03em;
+    }
+
+    .nav-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 1rem;
+      font-weight: 900;
+      line-height: 1;
+      -webkit-text-stroke: 0.35px currentColor;
+      transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .nav-button:hover .nav-icon {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav-button.active .nav-icon {
+      background: rgba(18, 22, 31, 0.08);
+      color: #11161f;
+      box-shadow: inset 0 0 0 1px rgba(18, 22, 31, 0.08);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .upgrade-card {
+      padding: 18px;
+      border-radius: 22px;
+      background:
+        linear-gradient(135deg, rgba(18, 22, 31, 0.15), rgba(18, 22, 31, 0.82)),
+        radial-gradient(circle at 88% 20%, rgba(22, 133, 88, 0.8), transparent 38%),
+        #05070a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .upgrade-card strong {
+      display: block;
+      font-size: 0.98rem;
+      margin-bottom: 6px;
+    }
+
+    .upgrade-card span {
+      display: block;
+      color: rgba(255, 255, 255, 0.66);
+      font-size: 0.77rem;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .upgrade-card button {
+      width: 100%;
+      min-height: 38px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--green);
+      font-weight: 800;
+    }
+
+    .profile-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 850;
+      background: linear-gradient(135deg, #f06a1a, #2563eb);
+      flex: 0 0 auto;
+    }
+
+    .profile-copy {
+      min-width: 0;
+    }
+
+    .profile-copy strong,
+    .profile-copy span {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-copy strong {
+      font-size: 0.83rem;
+    }
+
+    .profile-copy span {
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.54);
+      margin-top: 2px;
+    }
+
+    .main {
+      min-width: 0;
+      background: #f7f7f5;
+      padding: 26px 28px 34px;
+      overflow: auto;
+      height: 100vh;
+      max-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: -26px -28px 28px;
+      padding: 26px 28px 12px;
+      background: rgba(247, 247, 245, 0.88);
+      border-bottom: 1px solid rgba(231, 232, 236, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .breadcrumbs {
+      color: var(--muted);
+      font-size: 0.83rem;
+      font-weight: 650;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .search {
+      width: min(360px, 30vw);
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 14px;
+      color: var(--soft);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .search input {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 0.88rem;
+    }
+
+    .icon-button,
+    .pill-button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 15px;
+      font-weight: 780;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .icon-button {
+      width: 42px;
+      padding: 0;
+    }
+
+    .pill-button.primary {
+      border-color: var(--accent);
+      color: #fff;
+      background: linear-gradient(135deg, #f97316, #cc4f0b);
+      box-shadow: 0 12px 24px rgba(240, 106, 26, 0.22);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: enter 0.2s ease-out;
+    }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+      font-weight: 900;
+    }
+
+    .page-sub {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 620px;
+      font-size: 0.95rem;
+    }
+
+    .segmented {
+      display: inline-flex;
+      padding: 5px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: var(--shadow-soft);
+      gap: 4px;
+    }
+
+    .segment {
+      border: 0;
+      border-radius: 999px;
+      min-height: 36px;
+      padding: 0 16px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .segment.active {
+      background: var(--sidebar);
+      color: #fff;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .kpi {
+      min-height: 112px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi.featured {
+      background: linear-gradient(145deg, #17643e, #0f7a4b);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .kpi.featured::after {
+      content: "";
+      position: absolute;
+      right: -36px;
+      bottom: -58px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 24px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 0.77rem;
+      font-weight: 760;
+      margin-bottom: 10px;
+    }
+
+    .featured .kpi-label {
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .kpi-value {
+      font-size: clamp(1.6rem, 3vw, 2.35rem);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.055em;
+      margin-bottom: 8px;
+    }
+
+    .delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--green);
+      background: var(--green-soft);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 850;
+    }
+
+    .delta.down {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .featured .delta {
+      color: #d9ffe9;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.85fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .panel.pad {
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 850;
+      letter-spacing: -0.025em;
+    }
+
+    .panel-sub {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+
+    .chart-card {
+      min-height: 318px;
+    }
+
+    .chart-wrap {
+      height: 220px;
+      position: relative;
+      border-radius: 18px;
+      background:
+        linear-gradient(#eef0f3 1px, transparent 1px) 0 0 / 100% 52px,
+        linear-gradient(180deg, rgba(240, 106, 26, 0.09), transparent 55%);
+      overflow: hidden;
+    }
+
+    .line-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-top: 14px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      background: var(--accent);
+    }
+
+    .legend-dot.muted {
+      background: #c6cad2;
+    }
+
+    .panel-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .device-row,
+    .ref-row,
+    .attention-row,
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .device-row:last-child,
+    .ref-row:last-child,
+    .attention-row:last-child,
+    .link-row:last-child {
+      border-bottom: 0;
+    }
+
+    .icon-tile {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .tile-orange { background: var(--accent-soft); color: var(--accent); }
+    .tile-blue { background: var(--blue-soft); color: var(--blue); }
+    .tile-green { background: var(--green-soft); color: var(--green); }
+    .tile-purple { background: var(--purple-soft); color: var(--purple); }
+    .tile-red { background: var(--red-soft); color: var(--red); }
+    .tile-amber { background: var(--amber-soft); color: var(--amber); }
+
+    .row-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .row-copy strong,
+    .row-copy span {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-copy strong {
+      font-size: 0.9rem;
+      letter-spacing: -0.015em;
+    }
+
+    .row-copy span {
+      color: var(--muted);
+      font-size: 0.76rem;
+      margin-top: 3px;
+    }
+
+    .row-metric {
+      text-align: right;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .progress {
+      height: 7px;
+      border-radius: 999px;
+      background: #eceef2;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .progress.green span { background: var(--green); }
+    .progress.blue span { background: var(--blue); }
+    .progress.purple span { background: var(--purple); }
+    .progress.red span { background: var(--red); }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .data-table th {
+      text-align: left;
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.67rem;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfbfb;
+    }
+
+    .data-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table-title {
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .table-url {
+      color: var(--muted);
+      font-size: 0.76rem;
+      margin-top: 3px;
+      max-width: 360px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 0 9px;
+      font-size: 0.72rem;
+      font-weight: 850;
+    }
+
+    .badge.green { color: var(--green); background: var(--green-soft); }
+    .badge.orange { color: var(--accent); background: var(--accent-soft); }
+    .badge.red { color: var(--red); background: var(--red-soft); }
+    .badge.blue { color: var(--blue); background: var(--blue-soft); }
+    .badge.gray { color: var(--muted); background: #f0f1f3; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar .search {
+      box-shadow: none;
+      width: min(420px, 44vw);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .filter-chip {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      padding: 0 13px;
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+
+    .filter-chip.active {
+      color: #fff;
+      background: var(--sidebar);
+      border-color: var(--sidebar);
+    }
+
+    .link-actions {
+      display: flex;
+      gap: 7px;
+      justify-content: flex-end;
+    }
+
+    .action-mini {
+      min-height: 31px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 0 10px;
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
+      gap: 16px;
+    }
+
+    .bar-chart {
+      height: 236px;
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      align-items: end;
+      gap: 8px;
+      padding: 18px 10px 4px;
+      border-radius: 18px;
+      background: linear-gradient(#eef0f3 1px, transparent 1px) 0 0 / 100% 50px;
+    }
+
+    .bar {
+      border-radius: 999px 999px 6px 6px;
+      background: linear-gradient(180deg, #f97316, #f6b27c);
+      min-height: 18px;
+    }
+
+    .bar.alt {
+      background: repeating-linear-gradient(135deg, #cfd4db 0 4px, transparent 4px 8px);
+    }
+
+    .qr-layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .qr-preview {
+      display: grid;
+      place-items: center;
+      min-height: 430px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(22, 133, 88, 0.14), transparent 32%),
+        #fff;
+    }
+
+    .qr-box {
+      width: 230px;
+      height: 230px;
+      padding: 18px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 22px 45px rgba(17, 24, 39, 0.14);
+      display: grid;
+      place-items: center;
+    }
+
+    .fake-qr {
+      width: 180px;
+      height: 180px;
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      gap: 5px;
+    }
+
+    .fake-qr span {
+      border-radius: 4px;
+      background: var(--sidebar);
+    }
+
+    .fake-qr span:nth-child(3n),
+    .fake-qr span:nth-child(7n) {
+      background: var(--accent);
+    }
+
+    .control-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      min-height: 46px;
+      padding: 11px 13px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .field textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .swatch {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 1px var(--line), var(--shadow-soft);
+    }
+
+    .range-track {
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent) 0 62%, #e9ebef 62%);
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .settings-row:last-child {
+      border-bottom: 0;
+    }
+
+    .hero-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 95% 20%, rgba(240, 106, 26, 0.18), transparent 34%),
+        linear-gradient(135deg, #fff, #f7f7f5);
+      border: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+
+    .hero-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #f97316, #2563eb);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+
+    .mobile-nav {
+      display: none;
+    }
+
+    .mobile-fab {
+      display: none;
+    }
+
+    .hide-mobile {
+      display: inline-flex;
+    }
+
+    html[data-theme="dark"] body,
+    html[data-theme="dark"] .app-shell,
+    html[data-theme="dark"] .main {
+      background: #080c13;
+    }
+
+    html[data-theme="dark"] .sidebar {
+      background: linear-gradient(180deg, #070a10, #05070b);
+    }
+
+    html[data-theme="dark"] .topbar {
+      background: rgba(8, 12, 19, 0.88);
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    html[data-theme="dark"] .search,
+    html[data-theme="dark"] .icon-button,
+    html[data-theme="dark"] .pill-button,
+    html[data-theme="dark"] .segmented,
+    html[data-theme="dark"] .filter-chip,
+    html[data-theme="dark"] .action-mini,
+    html[data-theme="dark"] .field input,
+    html[data-theme="dark"] .field textarea,
+    html[data-theme="dark"] .field select {
+      background: #111722;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--ink);
+    }
+
+    html[data-theme="dark"] .search input {
+      color: var(--ink);
+    }
+
+    html[data-theme="dark"] .nav-button.active,
+    html[data-theme="dark"] .segment.active,
+    html[data-theme="dark"] .filter-chip.active {
+      background: #f4f7fb;
+      color: #090d14;
+    }
+
+    html[data-theme="dark"] .pill-button.primary {
+      border-color: var(--accent);
+      color: #fff;
+      background: linear-gradient(135deg, #f97316, #cc4f0b);
+      box-shadow: 0 12px 24px rgba(240, 106, 26, 0.24);
+    }
+
+    html[data-theme="dark"] .kpi,
+    html[data-theme="dark"] .panel,
+    html[data-theme="dark"] .profile-mini {
+      background: var(--panel);
+      border-color: var(--line);
+    }
+
+    html[data-theme="dark"] .kpi.featured {
+      background: linear-gradient(145deg, #17643e, #0f7a4b);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    html[data-theme="dark"] .chart-wrap,
+    html[data-theme="dark"] .bar-chart {
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px) 0 0 / 100% 52px,
+        linear-gradient(180deg, rgba(240, 106, 26, 0.11), transparent 55%);
+    }
+
+    html[data-theme="dark"] .data-table th {
+      background: #0e141e;
+      color: var(--soft);
+    }
+
+    html[data-theme="dark"] .data-table td,
+    html[data-theme="dark"] .device-row,
+    html[data-theme="dark"] .ref-row,
+    html[data-theme="dark"] .attention-row,
+    html[data-theme="dark"] .link-row,
+    html[data-theme="dark"] .settings-row {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    html[data-theme="dark"] .progress {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    html[data-theme="dark"] .hero-profile {
+      background:
+        radial-gradient(circle at 95% 20%, rgba(240, 106, 26, 0.18), transparent 34%),
+        linear-gradient(135deg, #121823, #0f1520);
+      border-color: var(--line);
+    }
+
+    html[data-theme="dark"] .qr-preview {
+      background:
+        radial-gradient(circle at 50% 20%, rgba(22, 133, 88, 0.16), transparent 32%),
+        var(--panel);
+    }
+
+    html[data-theme="dark"] .qr-box {
+      background: #f9fafb;
+    }
+
+    html[data-theme="dark"] .badge.gray {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+    }
+
+    @media (max-width: 1180px) {
+      .app-shell {
+        width: 100vw;
+        margin: 0;
+        grid-template-columns: 230px 1fr;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        min-height: 100vh;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .dashboard-grid,
+      .analytics-grid,
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      body {
+        background: #f7f7f5;
+        overflow: auto;
+      }
+
+      html[data-theme="dark"] body {
+        background: #080c13;
+      }
+
+      .app-shell {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        height: auto;
+        max-height: none;
+        min-height: 100vh;
+        padding: 18px 14px 92px;
+        overflow: visible;
+      }
+
+      .topbar {
+        margin: -18px -14px 20px;
+        padding: 18px 14px 10px;
+      }
+
+      .breadcrumbs {
+        display: none;
+      }
+
+      .search {
+        width: 100%;
+        box-shadow: none;
+      }
+
+      .topbar-actions {
+        width: 100%;
+      }
+
+      .topbar-actions .icon-button:not(.theme-toggle),
+      .topbar-actions .pill-button {
+        display: none;
+      }
+
+      .page-header {
+        display: block;
+      }
+
+      .page-header .segmented,
+      .page-header .pill-button {
+        margin-top: 14px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .kpi {
+        padding: 15px;
+        min-height: 104px;
+      }
+
+      .dashboard-grid,
+      .two-col,
+      .qr-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .toolbar .search {
+        width: 100%;
+      }
+
+      .table-scroll {
+        overflow-x: auto;
+      }
+
+      .data-table {
+        min-width: 720px;
+      }
+
+      .hide-mobile {
+        display: none;
+      }
+
+      .mobile-nav {
+        position: fixed;
+        z-index: 30;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        min-height: 66px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        padding: 6px;
+        border-radius: 24px;
+        background: rgba(18, 22, 31, 0.94);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+        backdrop-filter: blur(16px);
+      }
+
+      .mobile-nav .nav-button {
+        min-height: 54px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 18px;
+      }
+
+      .mobile-nav .nav-button span:last-child {
+        display: none;
+      }
+
+      .mobile-fab {
+        position: fixed;
+        z-index: 31;
+        right: 18px;
+        bottom: 88px;
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        color: #fff;
+        background: linear-gradient(135deg, #f97316, #cc4f0b);
+        box-shadow: 0 16px 35px rgba(240, 106, 26, 0.35);
+      }
+    }
+
+    @media (max-width: 520px) {
+      h1 {
+        font-size: 2.1rem;
+      }
+
+      .kpi-grid {
+        gap: 10px;
+      }
+
+      .kpi-value {
+        font-size: 1.65rem;
+      }
+
+      .panel.pad {
+        padding: 16px;
+      }
+
+      .chart-wrap {
+        height: 210px;
+      }
+
+      .qr-preview {
+        min-height: 330px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Desktop navigation">
+      <div class="brand">
+        <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" title="Collapse sidebar"></button>
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-name">DeepLinkOS</div>
+      </div>
+
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="nav-list">
+        <div class="nav-group open" data-nav-group="overview">
+          <button class="nav-button nav-group-toggle active" data-page-target="overview" data-group-toggle="overview">
+            <span class="nav-icon">⌂</span><span>Overview</span><span class="nav-chevron">⌄</span>
+          </button>
+          <div class="nav-sublist">
+            <button class="nav-subitem" data-page-target="links">Links</button>
+            <button class="nav-subitem" data-page-target="analytics">Analytics</button>
+            <button class="nav-subitem" data-page-target="qr">QR Designer</button>
+          </div>
+        </div>
+
+        <div class="nav-group" data-nav-group="settings">
+          <button class="nav-button nav-group-toggle" data-page-target="profile" data-group-toggle="settings">
+            <span class="nav-icon">⚙</span><span>Settings</span><span class="nav-chevron">⌄</span>
+          </button>
+          <div class="nav-sublist">
+            <button class="nav-subitem" data-page-target="profile">Profile</button>
+            <button class="nav-subitem" data-page-target="billing">Billing</button>
+          </div>
+        </div>
+
+        <div class="nav-group" data-nav-group="features">
+          <button class="nav-button nav-group-toggle" data-page-target="domains" data-group-toggle="features">
+            <span class="nav-icon">◇</span><span>Features</span><span class="nav-chevron">⌄</span>
+          </button>
+          <div class="nav-sublist">
+            <button class="nav-subitem" data-page-target="domains">Custom Domains</button>
+            <button class="nav-subitem" data-page-target="pixels">Pixels <span class="soon-pill">Soon</span></button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="upgrade-card">
+          <strong>Unlock branded links</strong>
+          <span>Custom domains, pixels, QR exports, and campaign attribution in one place.</span>
+          <button>Upgrade Plan</button>
+        </div>
+        <div class="profile-mini">
+          <div class="avatar">DL</div>
+          <div class="profile-copy">
+            <strong>Dana Lee</strong>
+            <span>growth@deeplinkos.com</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumbs" id="breadcrumb">Dashboard / Overview</div>
+        <div class="topbar-actions">
+          <label class="search" aria-label="Search prototype">
+            <span>⌕</span>
+            <input placeholder="Search links, campaigns, referrers..." />
+          </label>
+          <button class="pill-button hide-mobile">All regions</button>
+          <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Toggle theme">◐</button>
+          <button class="pill-button primary">+ Create link</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-overview">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Dashboard</div>
+            <h1>Overview</h1>
+            <p class="page-sub">A faster read on link health, campaign traffic, and what needs attention before the next launch.</p>
+          </div>
+          <div class="segmented" aria-label="Date range">
+            <button class="segment active">Last 7 days</button>
+            <button class="segment">30 days</button>
+            <button class="segment">All time</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi featured">
+            <div class="kpi-label">Total clicks</div>
+            <div class="kpi-value">142,847</div>
+            <span class="delta">↑ 18.2%</span>
+          </article>
+          <article class="kpi">
+            <div class="kpi-label">Unique visitors</div>
+            <div class="kpi-value">89,647</div>
+            <span class="delta">↑ 12.5%</span>
+          </article>
+          <article class="kpi">
+            <div class="kpi-label">Active links</div>
+            <div class="kpi-value">248</div>
+            <span class="delta">↑ 9 live</span>
+          </article>
+          <article class="kpi">
+            <div class="kpi-label">Top referrer</div>
+            <div class="kpi-value">IG</div>
+            <span class="delta">34.1%</span>
+          </article>
+          <article class="kpi">
+            <div class="kpi-label">Failed opens</div>
+            <div class="kpi-value">1.8%</div>
+            <span class="delta down">↓ 0.6%</span>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="panel pad chart-card">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Click Trend</h2>
+                <div class="panel-sub">Current period compared with previous period</div>
+              </div>
+              <div class="segmented"><button class="segment active">7D</button><button class="segment">20D</button><button class="segment">90D</button></div>
+            </div>
+            <div class="chart-wrap">
+              <svg class="line-svg" viewBox="0 0 900 250" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M35 190 C80 62 130 105 165 78 C205 50 225 205 280 160 C330 105 350 42 408 70 C470 98 442 184 512 170 C590 148 580 118 650 126 C714 135 720 65 780 94 C825 115 832 190 875 86" fill="none" stroke="#d3d7df" stroke-width="4" stroke-dasharray="11 12" />
+                <path d="M35 202 C70 92 120 80 165 96 C220 115 218 198 276 158 C338 98 352 38 410 62 C470 88 454 160 514 180 C585 208 578 108 650 128 C716 148 724 152 780 92 C835 32 845 154 875 112" fill="none" stroke="#f06a1a" stroke-width="5" />
+                <path d="M35 202 C70 92 120 80 165 96 C220 115 218 198 276 158 C338 98 352 38 410 62 C470 88 454 160 514 180 C585 208 578 108 650 128 C716 148 724 152 780 92 C835 32 845 154 875 112 L875 250 L35 250 Z" fill="rgba(240,106,26,0.10)" />
+                <g fill="#fff" stroke="#f06a1a" stroke-width="4">
+                  <circle cx="165" cy="96" r="6" />
+                  <circle cx="410" cy="62" r="6" />
+                  <circle cx="650" cy="128" r="6" />
+                  <circle cx="780" cy="92" r="6" />
+                  <circle cx="875" cy="112" r="6" />
+                </g>
+              </svg>
+            </div>
+            <div class="chart-legend">
+              <span><i class="legend-dot"></i>This period</span>
+              <span><i class="legend-dot muted"></i>Previous period</span>
+            </div>
+          </div>
+
+          <div class="panel-stack">
+            <div class="panel pad">
+              <div class="panel-header">
+                <div><h2 class="panel-title">Device Breakdown</h2><div class="panel-sub">Sessions by device type</div></div>
+              </div>
+              <div class="device-row">
+                <div class="icon-tile tile-orange">D</div>
+                <div class="row-copy"><strong>Desktop</strong><span>82,450 sessions</span><div class="progress"><span style="width:58%"></span></div></div>
+                <div class="row-metric">57.7%</div>
+              </div>
+              <div class="device-row">
+                <div class="icon-tile tile-blue">M</div>
+                <div class="row-copy"><strong>Mobile</strong><span>47,148 sessions</span><div class="progress blue"><span style="width:33%"></span></div></div>
+                <div class="row-metric">33.0%</div>
+              </div>
+              <div class="device-row">
+                <div class="icon-tile tile-purple">T</div>
+                <div class="row-copy"><strong>Tablet</strong><span>13,249 sessions</span><div class="progress purple"><span style="width:9%"></span></div></div>
+                <div class="row-metric">9.3%</div>
+              </div>
+            </div>
+
+            <div class="panel pad">
+              <div class="panel-header">
+                <div><h2 class="panel-title">Needs Attention</h2><div class="panel-sub">Operational issues worth fixing</div></div>
+              </div>
+              <div class="attention-row">
+                <div class="icon-tile tile-red">!</div>
+                <div class="row-copy"><strong>3 links have weak fallbacks</strong><span>Add desktop URLs before publishing</span></div>
+                <span class="badge red">Fix</span>
+              </div>
+              <div class="attention-row">
+                <div class="icon-tile tile-amber">DNS</div>
+                <div class="row-copy"><strong>brand.acme.co pending</strong><span>Verify CNAME setup</span></div>
+                <span class="badge orange">Verify</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="two-col" style="margin-top:16px">
+          <div class="panel">
+            <div class="panel-header" style="padding:20px 20px 0">
+              <div><h2 class="panel-title">Top Smart Links</h2><div class="panel-sub">Highest performing destinations</div></div>
+              <button class="action-mini" data-page-target="links">View all</button>
+            </div>
+            <div style="padding:0 20px 8px">
+              <div class="link-row"><div class="icon-tile tile-red">YT</div><div class="row-copy"><strong>Summer launch video</strong><span>deeplinkos.com/r/summer-launch</span></div><div class="row-metric">34,239</div></div>
+              <div class="link-row"><div class="icon-tile tile-purple">IG</div><div class="row-copy"><strong>Instagram profile handoff</strong><span>deeplinkos.com/r/ig-profile</span></div><div class="row-metric">18,567</div></div>
+              <div class="link-row"><div class="icon-tile tile-green">WA</div><div class="row-copy"><strong>WhatsApp sales chat</strong><span>deeplinkos.com/r/chat-now</span></div><div class="row-metric">12,871</div></div>
+            </div>
+          </div>
+
+          <div class="panel pad">
+            <div class="panel-header">
+              <div><h2 class="panel-title">Top Referrers</h2><div class="panel-sub">Where clicks originate</div></div>
+            </div>
+            <div class="ref-row"><div class="row-copy"><strong>instagram.com</strong><span>Social profile traffic</span></div><div class="row-metric">34%</div></div>
+            <div class="ref-row"><div class="row-copy"><strong>direct</strong><span>QR and pasted links</span></div><div class="row-metric">27%</div></div>
+            <div class="ref-row"><div class="row-copy"><strong>youtube.com</strong><span>Description link clicks</span></div><div class="row-metric">19%</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-links">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Manager</div>
+            <h1>Links</h1>
+            <p class="page-sub">A denser, calmer manager for smart links with status, platform context, and frequent actions close at hand.</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <label class="search"><span>⌕</span><input id="linkSearch" placeholder="Search by title, slug, platform..." /></label>
+          <button class="pill-button">Export CSV</button>
+        </div>
+        <div class="filter-row">
+          <button class="filter-chip active" data-filter="all">All 248</button>
+          <button class="filter-chip" data-filter="active">Active 231</button>
+          <button class="filter-chip" data-filter="paused">Paused 17</button>
+          <button class="filter-chip" data-filter="needs">Needs attention 3</button>
+        </div>
+        <div class="panel table-scroll">
+          <table class="data-table" id="linksTable">
+            <thead><tr><th>Smart link</th><th>Platform</th><th>Status</th><th>Clicks</th><th>Conv.</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr data-status="active"><td><div class="table-title">Summer launch video</div><div class="table-url">deeplinkos.com/r/summer-launch</div></td><td><span class="badge red">YouTube</span></td><td><span class="badge green">Active</span></td><td>34,239</td><td>24%</td><td><div class="link-actions"><button class="action-mini">Copy</button><button class="action-mini">Edit</button><button class="action-mini">QR</button></div></td></tr>
+              <tr data-status="active"><td><div class="table-title">Instagram profile handoff</div><div class="table-url">deeplinkos.com/r/ig-profile</div></td><td><span class="badge orange">Instagram</span></td><td><span class="badge green">Active</span></td><td>18,567</td><td>13%</td><td><div class="link-actions"><button class="action-mini">Copy</button><button class="action-mini">Edit</button><button class="action-mini">QR</button></div></td></tr>
+              <tr data-status="active"><td><div class="table-title">WhatsApp sales chat</div><div class="table-url">deeplinkos.com/r/chat-now</div></td><td><span class="badge green">WhatsApp</span></td><td><span class="badge green">Active</span></td><td>12,871</td><td>9%</td><td><div class="link-actions"><button class="action-mini">Copy</button><button class="action-mini">Edit</button><button class="action-mini">QR</button></div></td></tr>
+              <tr data-status="needs"><td><div class="table-title">TikTok shop promo</div><div class="table-url">deeplinkos.com/r/shop-drop</div></td><td><span class="badge gray">TikTok</span></td><td><span class="badge orange">Fallback needed</span></td><td>9,654</td><td>7%</td><td><div class="link-actions"><button class="action-mini">Fix</button><button class="action-mini">Edit</button><button class="action-mini">Pause</button></div></td></tr>
+              <tr data-status="paused"><td><div class="table-title">Old webinar replay</div><div class="table-url">deeplinkos.com/r/q1-webinar</div></td><td><span class="badge blue">Custom</span></td><td><span class="badge gray">Paused</span></td><td>8,190</td><td>6%</td><td><div class="link-actions"><button class="action-mini">Copy</button><button class="action-mini">Edit</button><button class="action-mini">Resume</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="page-analytics">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Performance</div>
+            <h1>Analytics</h1>
+            <p class="page-sub">A deeper performance workspace for traffic trends, device mix, geographies, referrers, and campaign-level comparison.</p>
+          </div>
+          <div class="segmented"><button class="segment active">Apr 1 - Apr 6</button><button class="segment">Compare</button></div>
+        </div>
+        <div class="kpi-grid">
+          <article class="kpi"><div class="kpi-label">Sessions</div><div class="kpi-value">142,847</div><span class="delta">↑ 18.2%</span></article>
+          <article class="kpi"><div class="kpi-label">Visitors</div><div class="kpi-value">89,647</div><span class="delta">↑ 12.5%</span></article>
+          <article class="kpi"><div class="kpi-label">App opens</div><div class="kpi-value">74.8%</div><span class="delta">↑ 8.7%</span></article>
+          <article class="kpi"><div class="kpi-label">QR scans</div><div class="kpi-value">3,816</div><span class="delta">↑ 21%</span></article>
+          <article class="kpi"><div class="kpi-label">Bounce</div><div class="kpi-value">3.1%</div><span class="delta down">↓ 1.4%</span></article>
+        </div>
+        <div class="analytics-grid">
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">Sessions Over Time</h2><div class="panel-sub">Daily sessions with platform comparison</div></div></div>
+            <div class="bar-chart">
+              <div class="bar" style="height:36%"></div><div class="bar alt" style="height:62%"></div><div class="bar" style="height:78%"></div><div class="bar" style="height:54%"></div><div class="bar" style="height:86%"></div><div class="bar alt" style="height:68%"></div><div class="bar" style="height:42%"></div><div class="bar" style="height:55%"></div><div class="bar alt" style="height:80%"></div><div class="bar" style="height:48%"></div><div class="bar" style="height:63%"></div><div class="bar alt" style="height:58%"></div><div class="bar" style="height:73%"></div><div class="bar" style="height:66%"></div>
+            </div>
+          </div>
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">Breakdown</h2><div class="panel-sub">Best traffic sources</div></div></div>
+            <div class="device-row"><div class="icon-tile tile-orange">IG</div><div class="row-copy"><strong>Instagram</strong><span>48,029 clicks</span><div class="progress"><span style="width:52%"></span></div></div><div class="row-metric">52%</div></div>
+            <div class="device-row"><div class="icon-tile tile-red">YT</div><div class="row-copy"><strong>YouTube</strong><span>31,487 clicks</span><div class="progress red"><span style="width:34%"></span></div></div><div class="row-metric">34%</div></div>
+            <div class="device-row"><div class="icon-tile tile-green">QR</div><div class="row-copy"><strong>QR scans</strong><span>8,204 clicks</span><div class="progress green"><span style="width:14%"></span></div></div><div class="row-metric">14%</div></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:16px">
+          <div class="panel table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Country</th><th>Clicks</th><th>Share</th><th>Open rate</th></tr></thead>
+              <tbody>
+                <tr><td>United States</td><td>30,406</td><td>35%</td><td>78%</td></tr>
+                <tr><td>United Kingdom</td><td>16,096</td><td>28%</td><td>72%</td></tr>
+                <tr><td>Germany</td><td>11,626</td><td>13%</td><td>69%</td></tr>
+                <tr><td>Indonesia</td><td>9,829</td><td>12%</td><td>64%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Campaign</th><th>Clicks</th><th>Share</th></tr></thead>
+              <tbody>
+                <tr><td>creator-bio</td><td>42,309</td><td>31%</td></tr>
+                <tr><td>youtube-desc</td><td>28,566</td><td>21%</td></tr>
+                <tr><td>retail-qr</td><td>13,408</td><td>10%</td></tr>
+                <tr><td>newsletter</td><td>11,902</td><td>8%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-qr">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Tools</div>
+            <h1>QR Designer</h1>
+            <p class="page-sub">A focused design surface for QR codes connected to smart links, with brand presets and export controls.</p>
+          </div>
+        </div>
+        <div class="qr-layout">
+          <div class="panel qr-preview">
+            <div>
+              <div class="qr-box">
+                <div class="fake-qr" aria-label="Decorative QR preview">
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <p class="page-sub" style="text-align:center;margin-top:18px">320 x 320 px · deeplinkos.com/r/summer-launch</p>
+            </div>
+          </div>
+          <div class="panel pad">
+            <div class="control-grid">
+              <div class="field"><label>Smart link</label><select><option>Summer launch video</option><option>Instagram profile handoff</option><option>WhatsApp sales chat</option></select></div>
+              <div class="field"><label>Destination</label><textarea>https://deeplinkos.com/r/summer-launch</textarea></div>
+              <div class="field"><label>Color preset</label><div class="swatches"><button class="swatch" style="background:#11161f"></button><button class="swatch" style="background:#f97316"></button><button class="swatch" style="background:#168558"></button><button class="swatch" style="background:#2563eb"></button><button class="swatch" style="background:#7c3aed"></button></div></div>
+              <div class="two-col">
+                <div class="field"><label>Foreground</label><input value="#12161F" /></div>
+                <div class="field"><label>Background</label><input value="#FFFFFF" /></div>
+              </div>
+              <div class="field"><label>Size</label><div class="range-track"></div><p class="page-sub" style="margin:0">320 px · PNG export · print-safe quiet zone</p></div>
+              <div class="two-col"><button class="pill-button primary">Download PNG</button><button class="pill-button">Open preview</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-profile">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Settings</div>
+            <h1>Profile</h1>
+            <p class="page-sub">Account identity, notification preferences, and API access for the current workspace.</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div>
+            <div class="hero-profile">
+              <div class="hero-avatar">DL</div>
+              <div class="row-copy"><strong>Dana Lee</strong><span>growth@deeplinkos.com · Pro workspace</span></div>
+              <span class="badge orange">Pro</span>
+            </div>
+            <div class="panel pad">
+              <div class="panel-header"><div><h2 class="panel-title">Account</h2><div class="panel-sub">Profile and workspace access</div></div></div>
+              <div class="settings-row"><div class="icon-tile tile-blue">P</div><div class="row-copy"><strong>Edit profile</strong><span>Name, avatar, email preferences</span></div><span>›</span></div>
+              <div class="settings-row"><div class="icon-tile tile-green">N</div><div class="row-copy"><strong>Notifications</strong><span>Weekly summary, failed route alerts</span></div><span class="badge green">On</span></div>
+              <div class="settings-row"><div class="icon-tile tile-purple">K</div><div class="row-copy"><strong>API access</strong><span>dl_live_••••••••••••••••</span></div><button class="action-mini">Copy</button></div>
+            </div>
+          </div>
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">Security</h2><div class="panel-sub">Session and workspace access controls</div></div></div>
+            <div class="settings-row"><div class="icon-tile tile-blue">2F</div><div class="row-copy"><strong>Two-factor authentication</strong><span>Recommended for team accounts</span></div><span class="badge gray">Off</span></div>
+            <div class="settings-row"><div class="icon-tile tile-green">S</div><div class="row-copy"><strong>Active sessions</strong><span>3 devices currently signed in</span></div><button class="action-mini">Review</button></div>
+            <div class="settings-row"><div class="icon-tile tile-red">↪</div><div class="row-copy"><strong>Sign out</strong><span>End this browser session</span></div><button class="action-mini">Sign out</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-billing">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Settings</div>
+            <h1>Billing</h1>
+            <p class="page-sub">Plan status, invoices, usage limits, and upgrade controls for DeepLinkOS.</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">Current Plan</h2><div class="panel-sub">Pro workspace · renews Jul 1</div></div><span class="badge orange">$9/mo</span></div>
+            <div class="kpi-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 0;">
+              <article class="kpi"><div class="kpi-label">Smart links</div><div class="kpi-value">248</div><span class="delta">31%</span></article>
+              <article class="kpi"><div class="kpi-label">QR exports</div><div class="kpi-value">86</div><span class="delta">12%</span></article>
+              <article class="kpi"><div class="kpi-label">Tracked clicks</div><div class="kpi-value">142k</div><span class="delta">48%</span></article>
+            </div>
+          </div>
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">Invoices</h2><div class="panel-sub">Recent billing activity</div></div><button class="action-mini">Manage</button></div>
+            <div class="settings-row"><div class="icon-tile tile-green">✓</div><div class="row-copy"><strong>Jun 1, 2026</strong><span>Pro plan · paid</span></div><span>$9.00</span></div>
+            <div class="settings-row"><div class="icon-tile tile-green">✓</div><div class="row-copy"><strong>May 1, 2026</strong><span>Pro plan · paid</span></div><span>$9.00</span></div>
+            <div class="settings-row"><div class="icon-tile tile-blue">↑</div><div class="row-copy"><strong>Upgrade path</strong><span>Team plan unlocks users and SSO</span></div><button class="action-mini">Compare</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-domains">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Features</div>
+            <h1>Custom Domains</h1>
+            <p class="page-sub">Connect branded domains and verify DNS records for trustworthy smart links.</p>
+          </div>
+          <button class="pill-button primary">+ Add domain</button>
+        </div>
+        <div class="settings-grid">
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">Connected Domains</h2><div class="panel-sub">Use branded URLs for every smart link</div></div></div>
+            <div class="settings-row"><div class="icon-tile tile-green">✓</div><div class="row-copy"><strong>go.deeplinkos.com</strong><span>Active · verified today</span></div><span class="badge green">Active</span></div>
+            <div class="settings-row"><div class="icon-tile tile-amber">!</div><div class="row-copy"><strong>brand.acme.co</strong><span>Waiting for CNAME</span></div><span class="badge orange">Pending</span></div>
+            <div class="settings-row"><div class="icon-tile tile-blue">+</div><div class="row-copy"><strong>link.yourbrand.com</strong><span>Add another domain for campaigns</span></div><button class="action-mini">Add</button></div>
+          </div>
+          <div class="panel pad">
+            <div class="panel-header"><div><h2 class="panel-title">DNS Record</h2><div class="panel-sub">Copy these values to your registrar</div></div></div>
+            <div class="settings-row"><div class="row-copy"><strong>Type</strong><span>CNAME</span></div><button class="action-mini">Copy</button></div>
+            <div class="settings-row"><div class="row-copy"><strong>Name / Host</strong><span>go</span></div><button class="action-mini">Copy</button></div>
+            <div class="settings-row"><div class="row-copy"><strong>Value</strong><span>deeplinkos.com</span></div><button class="action-mini">Copy</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-pixels">
+        <div class="page-header">
+          <div>
+            <div class="eyebrow">Features</div>
+            <h1>Pixels</h1>
+            <p class="page-sub">Connect ad platforms and fire conversion events through your smart links.</p>
+          </div>
+          <span class="badge orange">Coming soon</span>
+        </div>
+        <div class="panel pad">
+          <div class="panel-header"><div><h2 class="panel-title">Planned Integrations</h2><div class="panel-sub">Tracking integrations prepared for the product roadmap</div></div></div>
+          <div class="settings-row"><div class="icon-tile tile-blue">G</div><div class="row-copy"><strong>Google Analytics 4</strong><span>Send link redirect events and campaign parameters</span></div><span class="badge orange">Soon</span></div>
+          <div class="settings-row"><div class="icon-tile tile-blue">f</div><div class="row-copy"><strong>Meta Pixel</strong><span>Track Instagram and Facebook ad conversions</span></div><span class="badge orange">Soon</span></div>
+          <div class="settings-row"><div class="icon-tile tile-red">♪</div><div class="row-copy"><strong>TikTok Pixel</strong><span>Measure paid social traffic from smart links</span></div><span class="badge orange">Soon</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="nav-button active" data-page-target="overview"><span class="nav-icon">⌂</span><span>Overview</span></button>
+    <button class="nav-button" data-page-target="links"><span class="nav-icon">↗</span><span>Links</span></button>
+    <button class="nav-button" data-page-target="analytics"><span class="nav-icon">▥</span><span>Analytics</span></button>
+    <button class="nav-button" data-page-target="qr"><span class="nav-icon">▦</span><span>QR</span></button>
+    <button class="nav-button" data-page-target="profile"><span class="nav-icon">⚙</span><span>Settings</span></button>
+  </nav>
+  <button class="mobile-fab" aria-label="Create link">+</button>
+
+  <script>
+    const root = document.documentElement;
+    const appShell = document.querySelector(".app-shell");
+    const themeToggle = document.querySelector("[data-theme-toggle]");
+    const sidebarToggle = document.querySelector("[data-sidebar-toggle]");
+
+    function applyTheme(theme) {
+      const next = theme === "dark" ? "dark" : "light";
+      root.dataset.theme = next;
+      if (themeToggle) {
+        themeToggle.textContent = next === "dark" ? "☀" : "◐";
+        themeToggle.setAttribute("aria-label", next === "dark" ? "Switch to light mode" : "Switch to dark mode");
+        themeToggle.title = next === "dark" ? "Switch to light mode" : "Switch to dark mode";
+      }
+      localStorage.setItem("dlos-prototype-theme", next);
+    }
+
+    function applySidebar(collapsed) {
+      appShell.classList.toggle("sidebar-collapsed", collapsed);
+      if (sidebarToggle) {
+        sidebarToggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+        sidebarToggle.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+      }
+      localStorage.setItem("dlos-prototype-sidebar-collapsed", collapsed ? "true" : "false");
+    }
+
+    const savedTheme = localStorage.getItem("dlos-prototype-theme");
+    const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(savedTheme || (preferredDark ? "dark" : "light"));
+    applySidebar(localStorage.getItem("dlos-prototype-sidebar-collapsed") === "true");
+
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
+      });
+    }
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener("click", () => {
+        applySidebar(!appShell.classList.contains("sidebar-collapsed"));
+      });
+    }
+
+    const labels = {
+      overview: "Dashboard / Overview",
+      links: "Dashboard / Links",
+      analytics: "Dashboard / Analytics",
+      qr: "Dashboard / QR Designer",
+      profile: "Settings / Profile",
+      billing: "Settings / Billing",
+      domains: "Features / Custom Domains",
+      pixels: "Features / Pixels"
+    };
+
+    const pageGroups = {
+      overview: "overview",
+      links: "overview",
+      analytics: "overview",
+      qr: "overview",
+      profile: "settings",
+      billing: "settings",
+      domains: "features",
+      pixels: "features"
+    };
+
+    function setPage(page) {
+      if (!labels[page]) page = "overview";
+      const activeGroup = pageGroups[page];
+
+      document.querySelectorAll(".page").forEach((el) => {
+        el.classList.toggle("active", el.id === "page-" + page);
+      });
+
+      document.querySelectorAll("[data-page-target]").forEach((el) => {
+        const target = el.dataset.pageTarget;
+        const isExact = target === page;
+        const isParent = el.classList.contains("nav-group-toggle") && el.dataset.groupToggle === activeGroup;
+        el.classList.toggle("active", isExact || isParent);
+      });
+
+      document.querySelectorAll("[data-nav-group]").forEach((group) => {
+        group.classList.toggle("open", group.dataset.navGroup === activeGroup);
+      });
+
+      document.getElementById("breadcrumb").textContent = labels[page] || labels.overview;
+      window.location.hash = page;
+    }
+
+    document.querySelectorAll("[data-page-target]").forEach((button) => {
+      button.addEventListener("click", () => setPage(button.dataset.pageTarget));
+    });
+
+    document.querySelectorAll("[data-group-toggle]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const group = button.closest("[data-nav-group]");
+        if (group) group.classList.add("open");
+      });
+    });
+
+    const initial = window.location.hash.replace("#", "");
+    if (labels[initial]) setPage(initial);
+
+    document.querySelectorAll(".filter-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const filter = chip.dataset.filter;
+        if (!filter) return;
+        document.querySelectorAll(".filter-chip").forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        document.querySelectorAll("#linksTable tbody tr").forEach((row) => {
+          const show = filter === "all" || row.dataset.status === filter;
+          row.style.display = show ? "" : "none";
+        });
+      });
+    });
+
+    const search = document.getElementById("linkSearch");
+    if (search) {
+      search.addEventListener("input", () => {
+        const q = search.value.toLowerCase().trim();
+        document.querySelectorAll("#linksTable tbody tr").forEach((row) => {
+          row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+        });
+      });
+    }
+  </script>
+</body>
+</html>
