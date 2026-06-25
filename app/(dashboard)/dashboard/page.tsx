@@ -1,19 +1,31 @@
 import { PageFrame } from "@/components/dashboard/page-frame";
+import { listLinksForUser } from "@/lib/links";
+import { createClient } from "@/lib/supabase/server";
 
-const metrics = [
-  { label: "Total Clicks", value: "142,847", badge: "+18.2%" },
-  { label: "Unique Visitors", value: "89,647", badge: "+12.5%" },
-  { label: "Active Links", value: "248", badge: "9 live" },
-  { label: "Top Referrer", value: "Instagram", badge: "34.1%" },
-];
+function siteUrl() {
+  return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
+}
 
-const links = [
-  { title: "Summer launch video", slug: "deeplinkos.com/r/summer-launch", clicks: "34,239" },
-  { title: "Instagram profile handoff", slug: "deeplinkos.com/r/ig-profile", clicks: "18,567" },
-  { title: "WhatsApp sales chat", slug: "deeplinkos.com/r/chat-now", clicks: "12,871" },
-];
+function shortUrl(slug: string) {
+  return `${siteUrl()}/r/${slug}`;
+}
 
-export default function DashboardHomePage() {
+export default async function DashboardHomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const links = user ? await listLinksForUser(user.id) : [];
+  const activeLinks = links.filter((link) => link.isActive);
+  const pausedLinks = links.filter((link) => !link.isActive);
+  const recentLinks = links.slice(0, 5);
+  const metrics = [
+    { label: "Total links", value: String(links.length), badge: "Owned" },
+    { label: "Active links", value: String(activeLinks.length), badge: "Live" },
+    { label: "Paused links", value: String(pausedLinks.length), badge: "Review" },
+    { label: "Top platform", value: activeLinks[0]?.preset ? activeLinks[0].preset.replace("-", " ") : "None yet", badge: "Detected" },
+  ];
+
   return (
     <PageFrame
       eyebrow="Dashboard"
@@ -42,13 +54,18 @@ export default function DashboardHomePage() {
                 </tr>
               </thead>
               <tbody>
-                {links.map((link) => (
+                {recentLinks.map((link) => (
                   <tr key={link.slug}>
                     <td>{link.title}</td>
-                    <td>{link.slug}</td>
-                    <td>{link.clicks}</td>
+                    <td>{shortUrl(link.slug)}</td>
+                    <td>{link.isActive ? "Active" : "Paused"}</td>
                   </tr>
                 ))}
+                {!recentLinks.length ? (
+                  <tr>
+                    <td colSpan={3}>Create your first smart link to populate this table.</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
@@ -65,20 +82,20 @@ export default function DashboardHomePage() {
           <div className="panel">
             <div className="eyebrow">Traffic Trend</div>
             <div className="card" style={{ marginTop: 12, minHeight: 260 }}>
-              Chart placeholder for the first pass. We will wire the real chart in phase 3 and phase 6.
+              Click trend will appear here once live traffic starts flowing through your smart links.
             </div>
           </div>
 
           <div className="panel">
-            <div className="eyebrow">Device Breakdown</div>
+            <div className="eyebrow">Next actions</div>
             <div className="card" style={{ marginTop: 12 }}>
-              Desktop 57.7%
+              Create links for your most important social, marketplace, or affiliate destinations.
             </div>
             <div className="card" style={{ marginTop: 10 }}>
-              Mobile 33.0%
+              Copy short URLs into campaigns and bios.
             </div>
             <div className="card" style={{ marginTop: 10 }}>
-              Tablet 9.3%
+              Visit links to validate redirect and click tracking.
             </div>
           </div>
         </div>
@@ -86,4 +103,3 @@ export default function DashboardHomePage() {
     </PageFrame>
   );
 }
-

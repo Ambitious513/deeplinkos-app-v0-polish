@@ -1,53 +1,26 @@
 import { PageFrame } from "@/components/dashboard/page-frame";
+import { LinksManager } from "@/components/dashboard/links-manager";
+import { listLinksForUser } from "@/lib/links";
+import { createClient } from "@/lib/supabase/server";
 
-const rows = [
-  { title: "Summer launch video", platform: "YouTube", status: "Active", clicks: "34,239" },
-  { title: "Instagram profile handoff", platform: "Instagram", status: "Active", clicks: "18,567" },
-  { title: "WhatsApp sales chat", platform: "WhatsApp", status: "Active", clicks: "12,871" },
-];
+function siteUrl() {
+  return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
+}
 
-export default function LinksPage() {
+export default async function LinksPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const links = user ? await listLinksForUser(user.id) : [];
+
   return (
     <PageFrame
       eyebrow="Dashboard"
       title="Links"
-      description="A dense but calm link manager for fast scanning, filtering, and edits."
+      description="Create, copy, pause, and inspect your smart links from one connected manager."
     >
-      <div className="panel">
-        <div className="card-grid" style={{ marginBottom: 16 }}>
-          <div className="card metric-card">
-            <div className="metric-label">Search</div>
-            <div className="metric-value" style={{ fontSize: "1.35rem" }}>Filter-ready</div>
-          </div>
-          <div className="card metric-card">
-            <div className="metric-label">Status</div>
-            <div className="metric-value" style={{ fontSize: "1.35rem" }}>Active / Paused</div>
-          </div>
-        </div>
-        <div className="table-card">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Smart link</th>
-                <th>Platform</th>
-                <th>Status</th>
-                <th>Clicks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.title}>
-                  <td>{row.title}</td>
-                  <td>{row.platform}</td>
-                  <td>{row.status}</td>
-                  <td>{row.clicks}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <LinksManager initialLinks={links} siteUrl={siteUrl()} />
     </PageFrame>
   );
 }
-
