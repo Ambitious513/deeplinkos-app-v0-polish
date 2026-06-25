@@ -1,16 +1,14 @@
-import { PublicPageFrame } from "@/components/public/page-frame";
+import type { Metadata } from "next";
+
+import { LegalPageContent } from "@/components/company/LegalPageContent";
+import { legalPages } from "@/content/company";
+
+export const metadata: Metadata = {
+  title: { absolute: "Privacy Policy | DeepLinkOS" },
+  description: "How DeepLinkOS handles account data, smart link analytics, cookies, payments, affiliates, and user rights.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
-  return (
-    <section className="section">
-      <PublicPageFrame
-        eyebrow="Privacy"
-        title="Privacy policy placeholder"
-        description="This page will later hold the final policy text. For now it keeps the route structure clean and buildable."
-      >
-        <div className="panel">Policy content will be added during the launch hardening phase.</div>
-      </PublicPageFrame>
-    </section>
-  );
+  return <LegalPageContent page={legalPages.privacy} titleId="privacy-title" />;
 }
-

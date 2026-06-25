@@ -1,4 +1,57 @@
 import type { Database, Json } from "@/lib/database.types";
+import type { ReactNode } from "react";
+
+export type Platform = {
+  name: string;
+  color: string;
+  icon: ReactNode;
+};
+
+export type Step = {
+  label: string;
+  title: string;
+  description: string;
+  gradient?: "primary" | "secondary" | "green";
+};
+
+export type Feature = {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  tag?: string;
+  wide?: boolean;
+  hero?: boolean;
+};
+
+export type Testimonial = {
+  quote: string;
+  author: string;
+  role: string;
+};
+
+export type PricingTeaser = {
+  name: string;
+  price: string;
+  suffix: string;
+  description: string;
+  features: string[];
+  highlighted?: boolean;
+  badge?: string;
+  cta: string;
+};
+
+export type DetectedPlatform = {
+  name: string;
+  color: string;
+  hint: string;
+};
+
+export type LinkGeneratorAdapter = {
+  generate?: (url: string) => Promise<void> | void;
+  detectPlatform?: (url: string) => DetectedPlatform | null;
+  openCompose?: (url: string) => void;
+  requireAuth?: () => void;
+};
 
 export type PresetKey =
   | "custom"

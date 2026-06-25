@@ -5,6 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://deeplinkos.com"),
   title: {
     default: "DeepLinkOS",
     template: "%s | DeepLinkOS",

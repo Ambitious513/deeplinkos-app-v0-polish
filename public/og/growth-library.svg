@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">DeepLinkOS Growth Library</title>
+  <desc id="desc">Open graph preview image for the DeepLinkOS Growth Library.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DEE9FE"/>
+      <stop offset="1" stop-color="#D8CCFF"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#1E3A8A" flood-opacity=".16"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(88 92)">
+    <rect width="58" height="58" rx="16" fill="url(#accent)" filter="url(#shadow)"/>
+    <text x="29" y="38" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900" fill="#fff">D</text>
+    <text x="78" y="39" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="900" fill="#0F172A">DeepLinkOS</text>
+  </g>
+  <text x="88" y="235" font-family="Inter, Arial, sans-serif" font-size="80" font-weight="900" letter-spacing="-4" fill="#0F172A">Growth Library</text>
+  <text x="88" y="325" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="-3" fill="#0F172A">Creator, ecommerce, and</text>
+  <text x="88" y="398" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="-3" fill="#0F172A">mobile growth playbooks</text>
+  <g transform="translate(810 168)" filter="url(#shadow)">
+    <rect width="260" height="320" rx="30" fill="#fff"/>
+    <rect x="28" y="42" width="130" height="24" rx="12" fill="#DBEAFE"/>
+    <rect x="28" y="96" width="200" height="22" rx="11" fill="#93C5FD"/>
+    <rect x="28" y="138" width="176" height="18" rx="9" fill="#BFDBFE"/>
+    <rect x="28" y="178" width="210" height="18" rx="9" fill="#BFDBFE"/>
+    <rect x="28" y="236" width="94" height="42" rx="14" fill="url(#accent)"/>
+  </g>
+  <text x="88" y="530" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#334155">Actionable strategy for turning high-intent clicks into customers.</text>
+</svg>

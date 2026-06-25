@@ -1,6 +1,16 @@
-import { PublicShell } from "@/components/public-shell";
 import type { ReactNode } from "react";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
-  return <PublicShell>{children}</PublicShell>;
+  return (
+    <>
+      <div className="bg-orb bg-orb--1" />
+      <div className="bg-orb bg-orb--2" />
+      <div className="bg-orb bg-orb--3" />
+      <SiteHeader />
+      <main>{children}</main>
+      <SiteFooter />
+    </>
+  );
 }

@@ -1,16 +1,14 @@
-import { PublicPageFrame } from "@/components/public/page-frame";
+import type { Metadata } from "next";
+
+import { LegalPageContent } from "@/components/company/LegalPageContent";
+import { legalPages } from "@/content/company";
+
+export const metadata: Metadata = {
+  title: { absolute: "Terms of Service | DeepLinkOS" },
+  description: "The DeepLinkOS draft terms for accounts, subscriptions, smart links, routing, acceptable use, and platform access.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
-  return (
-    <section className="section">
-      <PublicPageFrame
-        eyebrow="Terms"
-        title="Terms placeholder"
-        description="The route exists now so the launch copy can be refined without changing the structure later."
-      >
-        <div className="panel">Terms content will be finalized before launch.</div>
-      </PublicPageFrame>
-    </section>
-  );
+  return <LegalPageContent page={legalPages.terms} titleId="terms-title" />;
 }
-

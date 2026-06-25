@@ -1,33 +1,59 @@
-import Link from "next/link";
-import { PublicPageFrame } from "@/components/public/page-frame";
+import type { Metadata } from "next";
 
-const posts = [
-  { slug: "smart-link-basics", title: "Smart link basics", excerpt: "How routing, fallbacks, and tracking fit together." },
-  { slug: "qr-conversion", title: "QR that converts", excerpt: "Why QR should live inside the same link system." },
-  { slug: "custom-domains", title: "Why custom domains matter", excerpt: "The trust and brand lift that domains create." },
-];
+import { BlogPageContent } from "@/components/blog/BlogPageContent";
+import { blogPosts } from "@/content/blog";
 
-export default function BlogIndexPage() {
+export const metadata: Metadata = {
+  title: { absolute: "DeepLinkOS Growth Library | Creator, Ecommerce & Mobile Growth Playbooks" },
+  description:
+    "Read practical growth playbooks for creators, ecommerce stores, founders, and mobile teams covering smart links, social traffic, QR codes, attribution, campaigns, and conversions.",
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "DeepLinkOS Growth Library",
+    description:
+      "Growth playbooks for creators, ecommerce stores, founders, and mobile teams covering conversion, attribution, smart links, lifecycle campaigns, and deep linking.",
+    url: "https://deeplinkos.com/blog",
+    images: ["/og/growth-library.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DeepLinkOS Growth Library",
+    description:
+      "Growth playbooks for creators, ecommerce stores, founders, and mobile teams covering conversion, attribution, smart links, lifecycle campaigns, and deep linking.",
+    images: ["/og/growth-library.svg"],
+  },
+};
+
+const blogStructuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Blog",
+      "@id": "https://deeplinkos.com/blog#blog",
+      url: "https://deeplinkos.com/blog",
+      name: "DeepLinkOS Growth Library",
+      description:
+        "Growth playbooks for creators, ecommerce stores, founders, and mobile teams covering conversion, attribution, smart links, lifecycle campaigns, and deep linking.",
+      blogPost: blogPosts.map((post) => ({ "@id": `https://deeplinkos.com/blog/${post.slug}` })),
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://deeplinkos.com/blog#posts",
+      itemListElement: blogPosts.map((post, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `https://deeplinkos.com/blog/${post.slug}`,
+        name: post.title,
+      })),
+    },
+  ],
+};
+
+export default function BlogPage() {
   return (
-    <section className="section">
-      <PublicPageFrame
-        eyebrow="Blog"
-        title="A practical growth library"
-        description="Short, useful articles that support the product, the search footprint, and the launch narrative."
-      >
-        <div className="hero-list">
-          {posts.map((post) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="hero-list__item">
-              <div>
-                <div className="hero-list__label">{post.title}</div>
-                <div className="hero-list__meta">{post.excerpt}</div>
-              </div>
-              <span className="metric-pill">Read</span>
-            </Link>
-          ))}
-        </div>
-      </PublicPageFrame>
-    </section>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogStructuredData) }} />
+      <BlogPageContent />
+    </>
   );
 }
-

@@ -1,16 +1,14 @@
-import { PublicPageFrame } from "@/components/public/page-frame";
+import type { Metadata } from "next";
+
+import { LegalPageContent } from "@/components/company/LegalPageContent";
+import { legalPages } from "@/content/company";
+
+export const metadata: Metadata = {
+  title: { absolute: "Disclaimer | DeepLinkOS" },
+  description: "DeepLinkOS disclosure for affiliate links, recommendations, educational content, external links, and growth results.",
+  alternates: { canonical: "/disclaimer" },
+};
 
 export default function DisclaimerPage() {
-  return (
-    <section className="section">
-      <PublicPageFrame
-        eyebrow="Disclaimer"
-        title="Disclaimer placeholder"
-        description="This route is reserved for the legal copy that will ship with the product."
-      >
-        <div className="panel">Disclaimer content will be added later.</div>
-      </PublicPageFrame>
-    </section>
-  );
+  return <LegalPageContent page={legalPages.disclaimer} titleId="disclaimer-title" />;
 }
-

@@ -1,31 +1,24 @@
-import { PublicPageFrame } from "@/components/public/page-frame";
+import type { Metadata } from "next";
+import { PricingPageContent } from "@/components/pricing/PricingPageContent";
 
-const tiers = [
-  { name: "Free", price: "$0", detail: "Smart links, starter analytics, and basic QR exports." },
-  { name: "Pro", price: "$19", detail: "Custom domains, advanced analytics, team workflows, and campaign reporting." },
-];
+export const metadata: Metadata = {
+  title: { absolute: "DeepLinkOS Pricing | Start Free With Smart Links & App Links" },
+  description:
+    "Compare DeepLinkOS pricing for free smart links, app-opening deep links, QR code links, attribution, and campaign routing for creators, stores, marketers, and agencies.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "DeepLinkOS Pricing",
+    description:
+      "Start free with smart links, app links, QR code links, and campaign routing built for high-intent clicks.",
+    url: "https://deeplinkos.com/pricing",
+  },
+  twitter: {
+    title: "DeepLinkOS Pricing",
+    description:
+      "Start free with smart links, app links, QR code links, and campaign routing built for high-intent clicks.",
+  },
+};
 
 export default function PricingPage() {
-  return (
-    <section className="section">
-      <PublicPageFrame
-        eyebrow="Pricing"
-        title="Simple pricing that matches the product"
-        description="We will keep the first release honest: a free starting point and a paid plan for teams who need domains, analytics depth, and higher usage."
-      >
-        <div className="hero-list">
-          {tiers.map((tier) => (
-            <div key={tier.name} className="hero-list__item">
-              <div>
-                <div className="hero-list__label">{tier.name}</div>
-                <div className="hero-list__meta">{tier.detail}</div>
-              </div>
-              <span className="metric-pill">{tier.price}</span>
-            </div>
-          ))}
-        </div>
-      </PublicPageFrame>
-    </section>
-  );
+  return <PricingPageContent />;
 }
-
