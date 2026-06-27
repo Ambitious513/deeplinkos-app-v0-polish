@@ -282,8 +282,11 @@ function AuthModal({
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submittingProfile, setSubmittingProfile] = useState(false);
+  const [submittingEmail, setSubmittingEmail] = useState(false);
+  const [emailNotice, setEmailNotice] = useState<string | null>(null);
   const copy = modalCopy[modal.intent];
   const showProfileStep = Boolean(authState.user && !authState.onboarded);
+  const isLogin = modal.intent === "login";
 
   useEffect(() => {
     if (!modal.open) return;
@@ -360,6 +363,78 @@ function AuthModal({
     completeIntent(modal.intent, modal.next, modal.pendingUrl);
   }
 
+  async function saveProfile(firstName: FormDataEntryValue | null, lastName: FormDataEntryValue | null) {
+    const response = await fetch("/api/auth/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload?.error || "We could not save your profile. Please try again.");
+    }
+
+    setAuthState({ ...payload, loading: false });
+    return payload as ClientAuthState;
+  }
+
+  async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setEmailNotice(null);
+    setSubmittingEmail(true);
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+    const firstName = formData.get("first_name");
+    const lastName = formData.get("last_name");
+
+    try {
+      const supabase = createClient();
+
+      if (isLogin) {
+        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+        if (loginError) throw loginError;
+
+        const nextState = await refreshAuthState();
+        if (nextState.user && nextState.onboarded) {
+          completeIntent(modal.intent, modal.next, modal.pendingUrl);
+        }
+        return;
+      }
+
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: String(firstName || "").trim(),
+            last_name: String(lastName || "").trim(),
+          },
+        },
+      });
+
+      if (signupError) throw signupError;
+
+      if (!data.session) {
+        setEmailNotice("Account created. Check your email to confirm it, then come back and sign in.");
+        return;
+      }
+
+      await saveProfile(firstName, lastName);
+      completeIntent(modal.intent, modal.next, modal.pendingUrl);
+    } catch (emailError) {
+      setError(emailError instanceof Error ? emailError.message : "Authentication failed. Please try again.");
+    } finally {
+      setSubmittingEmail(false);
+    }
+  }
+
   return (
     <div className="auth-modal-backdrop" role="presentation" onMouseDown={() => setModal((current) => ({ ...current, open: false }))}>
       <section
@@ -391,6 +466,7 @@ function AuthModal({
           ) : null}
 
           {error ? <p className="auth-modal-alert auth-modal-alert--error">{error}</p> : null}
+          {emailNotice ? <p className="auth-modal-alert">{emailNotice}</p> : null}
 
           {showProfileStep ? (
             <form className="auth-modal-form" onSubmit={handleProfileSubmit}>
@@ -407,9 +483,62 @@ function AuthModal({
               </button>
             </form>
           ) : (
-            <div className="auth-modal-google-wrap">
-              <div ref={buttonRef} className="auth-modal-google" />
-              {!scriptReady ? <span className="auth-modal-loading">Loading secure Google sign-in...</span> : null}
+            <div className="auth-modal-stack">
+              <form className="auth-modal-form" onSubmit={handleEmailSubmit}>
+                {!isLogin ? (
+                  <div className="auth-modal-name-row">
+                    <label>
+                      First name
+                      <input name="first_name" autoComplete="given-name" placeholder="Dana" required />
+                    </label>
+                    <label>
+                      Last name
+                      <input name="last_name" autoComplete="family-name" placeholder="Lee" required />
+                    </label>
+                  </div>
+                ) : null}
+                <label>
+                  Email
+                  <input name="email" type="email" autoComplete="email" placeholder="you@example.com" required />
+                </label>
+                <label>
+                  Password
+                  <input
+                    name="password"
+                    type="password"
+                    autoComplete={isLogin ? "current-password" : "new-password"}
+                    minLength={8}
+                    placeholder={isLogin ? "Enter your password" : "Create a password"}
+                    required
+                  />
+                </label>
+                <button className="btn btn-primary auth-modal-submit" type="submit" disabled={submittingEmail}>
+                  {submittingEmail ? (isLogin ? "Signing in..." : "Creating account...") : isLogin ? "Sign in" : "Create account"}
+                </button>
+              </form>
+
+              <div className="auth-modal-switch">
+                {isLogin ? "New to DeepLinkOS?" : "Already have an account?"}{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setEmailNotice(null);
+                    setModal((current) => ({ ...current, intent: isLogin ? "signup" : "login" }));
+                  }}
+                >
+                  {isLogin ? "Create an account" : "Log in"}
+                </button>
+              </div>
+
+              <div className="auth-modal-divider">
+                <span>Or continue with</span>
+              </div>
+
+              <div className="auth-modal-google-wrap">
+                <div ref={buttonRef} className="auth-modal-google" />
+                {!scriptReady ? <span className="auth-modal-loading">Loading secure Google sign-in...</span> : null}
+              </div>
             </div>
           )}
 
@@ -426,17 +555,17 @@ const modalCopy: Record<AuthIntent, { kicker: string; title: string; body: strin
   login: {
     kicker: "Welcome back",
     title: "Pick up your smart links where you left off",
-    body: "Sign in with Google and jump back into your dashboard, campaigns, QR codes, and link analytics.",
+    body: "Sign in with your email and password, or use Google to jump back into your dashboard.",
   },
   signup: {
     kicker: "Start free",
-    title: "Create your DeepLinkOS workspace in one click",
-    body: "Use Google to start securely. No password to remember, no setup maze, just your first smart link.",
+    title: "Create your DeepLinkOS workspace",
+    body: "Add your name, email, and password to unlock the full onboarding and dashboard flow.",
   },
   generator: {
     kicker: "Experience the magic",
     title: "Save this smart route to your workspace",
-    body: "Sign in with Google to keep the generated link, add fallbacks, and turn it into a trackable campaign.",
+    body: "Create an account to keep this generated link, add fallbacks, and turn it into a trackable campaign.",
   },
 };
 

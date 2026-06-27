@@ -5745,6 +5745,50 @@ html[data-theme="light"] .auth-modal {
   justify-items: start;
 }
 
+.auth-modal-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-modal-name-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.auth-modal-switch {
+  color: var(--text3);
+  font-size: 0.92rem;
+}
+
+.auth-modal-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--orange);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.auth-modal-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text3);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.auth-modal-divider::before,
+.auth-modal-divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--border2);
+  content: "";
+}
+
 .auth-modal-google {
   min-height: 44px;
 }
@@ -5991,6 +6035,14 @@ html[data-theme="light"] .auth-modal {
 
   .auth-modal-content h2 {
     font-size: clamp(2rem, 11vw, 3rem);
+  }
+
+  .auth-modal-name-row {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-modal-google-wrap {
+    justify-items: stretch;
   }
 
   .links-composer__grid {
