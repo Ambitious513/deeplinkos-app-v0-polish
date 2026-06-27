@@ -31,6 +31,23 @@ Focus on the full journey:
 
 v0 should use its design strengths freely. The goal is not to merely decorate the current UI; the goal is to make the app feel polished, intentional, and launch-ready.
 
+## Environment Setup
+
+Use `.env.example` as the public/client-safe starting point. It includes:
+
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+
+Create a private `.env.local` for server-only values. Do not commit real values for:
+
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `IP_HASH_SALT`
+- `RESEND_API_KEY`
+
+The Supabase project is already configured with the schema, RLS policies, profile trigger, analytics RPCs, and Google auth for local testing. v0 should be able to run against the managed Supabase project once private server values are supplied locally or through its environment manager.
+
 ## Creative Freedom
 
 v0 may improve:
@@ -169,4 +186,3 @@ Return:
 - A list of any API or data-contract changes, if any.
 - Screenshots or preview links for homepage, auth modal, onboarding, dashboard overview, and links manager.
 - Any known limitations or recommended next steps.
-
