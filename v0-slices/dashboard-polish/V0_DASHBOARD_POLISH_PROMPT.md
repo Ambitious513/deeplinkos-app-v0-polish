@@ -4,6 +4,29 @@ You are polishing the authenticated dashboard for DeepLinkOS, a smart-link SaaS 
 
 This upload is a dashboard-only slice. Do not redesign the public homepage, auth modal, Supabase schema, redirect logic, or API contracts.
 
+## Most Important Reference
+
+Use `v0-scaffold-reference/` as the preferred dashboard design baseline.
+
+That folder is an earlier v0-generated dashboard scaffold that is already close to the desired direction. It includes:
+
+- `components/dashboard/app-shell.tsx`
+- `components/dashboard/sidebar.tsx`
+- `components/dashboard/topbar.tsx`
+- `components/dashboard/mobile-nav.tsx`
+- `components/dashboard/page-header.tsx`
+- `components/dashboard/kpi-grid.tsx`
+- `components/dashboard/trend-chart.tsx`
+- `components/dashboard/primitives.tsx`
+- `components/dashboard/theme-toggle.tsx`
+- `lib/nav.ts`
+- `lib/mock-data.ts`
+- dashboard route examples
+
+Do not start from scratch. Use this scaffold's structure, component ideas, navigation model, density, and dashboard page composition as the easiest path. The main thing that needs adjustment is polish, merge-readiness, and color refinement.
+
+The real app source to merge into is `current-source/`. Preserve the real app's API calls, auth guard, route names, and link-manager behavior.
+
 ## Primary Goal
 
 Improve the current dashboard UI into a production-quality SaaS workspace while preserving the existing Next.js App Router structure and working functionality.
@@ -15,7 +38,7 @@ Use the current code as the source of truth:
 - `current-source/components/dashboard/`
 - `current-source/app/globals.css`
 
-Use the references as design direction:
+Use the references as supporting design direction:
 
 - `references/dashboard-vision-prototype.html`
 - `references/dashboard-inspo-1.webp`
@@ -24,7 +47,7 @@ Use the references as design direction:
 
 ## Design Direction
 
-Use the existing v0/prototype dashboard scaffold as the base direction, but improve the color system and polish.
+Use `v0-scaffold-reference/` as the base direction, but improve the color system and polish.
 
 Target feel:
 
@@ -215,6 +238,15 @@ Recommended palette behavior:
 - Info/support: restrained blue.
 
 Do not make the dashboard one-note blue, purple, beige, or espresso.
+
+The scaffold is structurally useful, but if its palette feels too generic, blue-heavy, or too shadcn-default, refine it toward DeepLinkOS:
+
+- dark charcoal sidebar
+- warm neutral content canvas
+- orange primary actions
+- crisp white/neutral cards in light mode
+- strong but restrained dark mode
+- status colors only where meaningful
 
 ## Output Expectations
 

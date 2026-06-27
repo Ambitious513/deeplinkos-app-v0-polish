@@ -9,6 +9,7 @@ This folder is a focused handoff package for v0. It is intentionally limited to 
 - `current-source/components/dashboard/` - dashboard-specific components.
 - `current-source/app/globals.css` - current global CSS, including dashboard styles.
 - `current-source/docs/03-v0-dashboard-implementation-brief.md` - earlier dashboard implementation brief.
+- `v0-scaffold-reference/` - the earlier v0-generated dashboard scaffold. Treat this as the strongest visual/base reference.
 - `references/` - approved dashboard prototype and inspiration images.
 
 ## How To Use This With v0
@@ -16,6 +17,8 @@ This folder is a focused handoff package for v0. It is intentionally limited to 
 Upload this entire `dashboard-polish` folder to v0 and paste the contents of `V0_DASHBOARD_POLISH_PROMPT.md` as the instruction prompt.
 
 The goal is not a full app rebuild. The goal is a dashboard design pass that can be merged back into the real Next.js app with minimal product risk.
+
+Important: the `v0-scaffold-reference/` folder is the closest existing version of the desired dashboard. Ask v0 to use that scaffold as the visual and component-system baseline, then adapt it to the real app source in `current-source/`.
 
 ## Reviewer Note
 
