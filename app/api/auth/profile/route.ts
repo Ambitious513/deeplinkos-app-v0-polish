@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { hasSupabaseEnv } from "@/lib/env";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 function jsonError(message: string, status: number) {
@@ -29,12 +30,13 @@ export async function POST(request: NextRequest) {
     return jsonError("Sign in again to finish onboarding.", 401);
   }
 
-  const { data: existingProfile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  const admin = createAdminClient();
+  const { data: existingProfile } = await admin.from("profiles").select("*").eq("id", user.id).maybeSingle();
   const workspaceName = existingProfile?.workspace_name || `${firstName}'s workspace`;
   const avatarUrl = typeof user.user_metadata?.avatar_url === "string" ? user.user_metadata.avatar_url : existingProfile?.avatar_url;
   const now = new Date().toISOString();
 
-  const { data: profile, error } = await supabase
+  const { data: profile, error } = await admin
     .from("profiles")
     .upsert({
       id: user.id,
