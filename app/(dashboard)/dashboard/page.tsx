@@ -155,7 +155,6 @@ export default async function DashboardHomePage() {
           <div
             key={card.label}
             className={`card kpi-card${card.featured ? " kpi-card--featured" : ""}`}
-            style={{ gridColumn: "span 2" }}
           >
             <div className="kpi-card__label">{card.label}</div>
             <div className="kpi-card__value">{card.value}</div>
